@@ -64,3 +64,31 @@ also references these exact names.
 
 Good luck — and remember to commit your progress to GitHub regularly
 as you complete each task, not just once at the end!
+
+## Task 2 — Data Cleaning Findings
+
+### Products
+
+The raw products data contained 16 rows. During cleaning, 4 rows were removed, leaving 12 clean rows.
+
+The following cleaning decisions were made:
+
+- Exact duplicate rows were removed.
+- Rows with a missing `product_name` were removed because a product without a name cannot be reliably identified.
+- Rows with a missing `unit_price` were removed because the correct price could not be determined without guessing.
+- Category names were standardised using Title Case so that values such as `beverages` and `Beverages` use a consistent format.
+
+### Sales
+
+The raw sales data contained 71 rows. After cleaning, 43 rows remained.
+
+The following cleaning decisions were made:
+
+- Sale dates were converted from the different formats found in the raw data into the standard `YYYY-MM-DD` format.
+- Rows with missing or unparseable sale dates were removed because sales trends cannot be analysed reliably without a date.
+- Rows with missing quantities were removed because a sale without a quantity cannot be used reliably for sales calculations.
+- Missing payment methods were changed to `Unknown` rather than guessing the payment method.
+- Sales records referencing product IDs that did not exist in the cleaned products data were removed.
+- Exact duplicate sales rows were removed.
+
+After cleaning, the data contained no missing sale dates, quantities or payment methods, no invalid product IDs and no duplicate rows.
