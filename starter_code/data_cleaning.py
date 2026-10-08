@@ -43,10 +43,10 @@ def load_raw_data(products_path: str, sales_path: str):
     Returns:
         (products_df, sales_df) tuple of pandas DataFrames, UNCLEANED.
     """
-    # TODO:
-    #   1. Use pd.read_csv() to load both files.
-    #   2. Return them as a tuple: (products_df, sales_df)
-    raise NotImplementedError
+    products_df = pd.read_csv(products_path)
+    sales_df = pd.read_csv(sales_path)
+
+    return products_df, sales_df
 
 
 def clean_products(products_df: "pd.DataFrame") -> "pd.DataFrame":
@@ -65,8 +65,13 @@ def clean_products(products_df: "pd.DataFrame") -> "pd.DataFrame":
     Returns:
         A cleaned copy of the DataFrame. Do not modify products_df in place.
     """
-    # TODO: implement the cleaning steps described above.
-    raise NotImplementedError
+    cleaned = products_df.copy()
+    cleaned = cleaned.drop_duplicates()
+    cleaned = cleaned.dropna(subset=["product_name"])
+    cleaned = cleaned.dropna(subset=["unit_price"])
+    cleaned["category"] = cleaned["category"].str.title()
+
+    return cleaned
 
 
 def clean_sales(sales_df: "pd.DataFrame", valid_product_ids) -> "pd.DataFrame":
@@ -96,8 +101,21 @@ def clean_sales(sales_df: "pd.DataFrame", valid_product_ids) -> "pd.DataFrame":
         column (as a string in YYYY-MM-DD format) and no missing values
         in quantity or product_id.
     """
-    # TODO: implement the cleaning steps described above.
-    raise NotImplementedError
+    cleaned = sales_df.copy()
+    cleaned["sale_date"] = pd.to_datetime(
+    cleaned["sale_date"],
+    format="mixed",
+    errors="coerce"
+)
+    cleaned = cleaned.dropna(subset=["sale_date"])
+    cleaned["sale_date"] = cleaned["sale_date"].dt.strftime("%Y-%m-%d")
+    cleaned["quantity"] = pd.to_numeric(cleaned["quantity"], errors="coerce")
+    cleaned = cleaned.dropna(subset=["quantity"])
+    cleaned["payment_method"] = cleaned["payment_method"].fillna("Unknown")
+    cleaned = cleaned[cleaned["product_id"].isin(valid_product_ids)]
+    cleaned = cleaned.drop_duplicates()
+
+    return cleaned
 
 
 def cleaning_summary(raw_df: "pd.DataFrame", clean_df: "pd.DataFrame", name: str) -> str:
@@ -109,5 +127,8 @@ def cleaning_summary(raw_df: "pd.DataFrame", clean_df: "pd.DataFrame", name: str
     Example output:
         "products: 16 raw rows -> 14 clean rows (2 removed)"
     """
-    # TODO: compare len(raw_df) and len(clean_df) and format a message.
-    raise NotImplementedError
+    raw_count = len(raw_df)
+    clean_count = len(clean_df)
+    removed = raw_count - clean_count
+
+    return f"{name}: {raw_count} raw rows -> {clean_count} clean rows ({removed} removed)"
