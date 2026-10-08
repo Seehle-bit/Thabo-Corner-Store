@@ -27,8 +27,7 @@ def get_connection(db_path: str = "store.db") -> sqlite3.Connection:
     Returns:
         an open sqlite3.Connection
     """
-    # TODO: return sqlite3.connect(db_path)
-    raise NotImplementedError
+    return sqlite3.connect(db_path)
 
 
 def create_tables(conn: sqlite3.Connection) -> None:
@@ -57,7 +56,29 @@ def create_tables(conn: sqlite3.Connection) -> None:
         and execute them using conn.execute(...). Remember to call
         conn.commit() at the end.
     """
-    raise NotImplementedError
+    products_sql = """
+    CREATE TABLE IF NOT EXISTS products (
+        product_id TEXT PRIMARY KEY,
+        product_name TEXT NOT NULL,
+        category TEXT,
+        unit_price REAL
+    )
+    """
+
+    sales_sql = """
+    CREATE TABLE IF NOT EXISTS sales (
+        sale_id TEXT PRIMARY KEY,
+        product_id TEXT,
+        quantity INTEGER,
+        sale_date TEXT,
+        payment_method TEXT,
+        customer_type TEXT,
+        FOREIGN KEY (product_id) REFERENCES products(product_id)
+    )
+    """
+    conn.execute(products_sql)
+    conn.execute(sales_sql)
+    conn.commit()
 
 
 def insert_products(conn: sqlite3.Connection, products_df) -> None:
@@ -70,7 +91,17 @@ def insert_products(conn: sqlite3.Connection, products_df) -> None:
         products_df.to_sql("products", conn, if_exists="append", index=False))
         and insert each row. Remember conn.commit().
     """
-    raise NotImplementedError
+    for row in products_df.itertuples(index=False):
+        conn.execute(
+            """
+            INSERT INTO products
+            (product_id, product_name, category, unit_price)
+            VALUES (?, ?, ?, ?)
+            """,
+            (row.product_id, row.product_name, row.category, row.unit_price)
+        )
+
+    conn.commit()
 
 
 def insert_sales(conn: sqlite3.Connection, sales_df) -> None:
@@ -79,7 +110,24 @@ def insert_sales(conn: sqlite3.Connection, sales_df) -> None:
 
     TODO: same approach as insert_products().
     """
-    raise NotImplementedError
+    for row in sales_df.itertuples(index=False):
+        conn.execute(
+            """
+            INSERT INTO sales
+            (sale_id, product_id, quantity, sale_date, payment_method, customer_type)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                row.sale_id,
+                row.product_id,
+                row.quantity,
+                row.sale_date,
+                row.payment_method,
+                row.customer_type
+            )
+        )
+
+    conn.commit()
 
 
 # ---------------------------------------------------------------------
@@ -99,50 +147,89 @@ def query_total_revenue_per_product(conn: sqlite3.Connection):
     Execute it with conn.execute(sql) and return conn.execute(sql).fetchall()
     """
     sql = """
-    -- TODO: write your JOIN + GROUP BY + SUM query here
+    SELECT
+        products.product_name,
+        SUM(sales.quantity * products.unit_price) AS total_revenue
+    FROM sales
+    JOIN products
+        ON sales.product_id = products.product_id
+    GROUP BY products.product_id, products.product_name
+    ORDER BY total_revenue DESC
     """
-    raise NotImplementedError
+
+    return conn.execute(sql).fetchall()
 
 
 def query_best_selling_product(conn: sqlite3.Connection):
     """
-    Return the single product with the highest total quantity sold.
+    Return the single best-selling product by total quantity sold.
 
-    TODO: SUM(quantity) grouped by product, ORDER BY that sum DESC, LIMIT 1.
+    TODO: use JOIN, SUM(), GROUP BY, ORDER BY and LIMIT 1.
     """
     sql = """
-    -- TODO
+    SELECT
+        products.product_name,
+        SUM(sales.quantity) AS total_quantity
+    FROM sales
+    JOIN products
+        ON sales.product_id = products.product_id
+    GROUP BY products.product_id, products.product_name
+    ORDER BY total_quantity DESC
+    LIMIT 1
     """
-    raise NotImplementedError
+
+    return conn.execute(sql).fetchall()
 
 
 def query_sales_by_payment_method(conn: sqlite3.Connection):
     """
-    Return the number of sales transactions per payment_method.
+    Return the number of sales for each payment method.
 
-    TODO: COUNT(*) grouped by payment_method.
+    TODO: use COUNT() and GROUP BY.
     """
     sql = """
-    -- TODO
+    SELECT
+        payment_method,
+        COUNT(*) AS total_sales
+    FROM sales
+    GROUP BY payment_method
+    ORDER BY total_sales DESC
     """
-    raise NotImplementedError
+
+    return conn.execute(sql).fetchall()
 
 
 def query_custom_one(conn: sqlite3.Connection):
     """
-    Your own SQL query #1. Pick a business question that interests you,
-    e.g. "Which category earns the most revenue?" or "How many sales
-    were made to Regular customers vs Walk-in customers?"
-
-    Document the question you chose as the docstring above your SQL.
+    Custom business question:
+    Which product category generates the most revenue?
     """
-    raise NotImplementedError
+    sql = """
+    SELECT
+        products.category,
+        SUM(sales.quantity * products.unit_price) AS total_revenue
+    FROM sales
+    JOIN products
+        ON sales.product_id = products.product_id
+    GROUP BY products.category
+    ORDER BY total_revenue DESC
+    """
+
+    return conn.execute(sql).fetchall()
 
 
 def query_custom_two(conn: sqlite3.Connection):
     """
-    Your own SQL query #2. Choose a different type of question from
-    query_custom_one (e.g. use a WHERE filter, or a date range,
-    or a HAVING clause).
+    Custom business question:
+    How many sales were made to each customer type?
     """
-    raise NotImplementedError
+    sql = """
+    SELECT
+        customer_type,
+        COUNT(*) AS total_sales
+    FROM sales
+    GROUP BY customer_type
+    ORDER BY total_sales DESC
+    """
+
+    return conn.execute(sql).fetchall()
