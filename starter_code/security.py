@@ -24,7 +24,7 @@ import getpass
 # For this project, one hardcoded hash is fine — but note in your
 # README why storing it in the database (KM-04 idea) would be better
 # than hardcoding it here.
-STORED_PASSWORD_HASH = None  # TODO: set this using hash_password() below
+
 
 
 def hash_password(plain_text_password: str) -> str:
@@ -42,7 +42,7 @@ def hash_password(plain_text_password: str) -> str:
     TODO:
         return hashlib.sha256(plain_text_password.encode()).hexdigest()
     """
-    raise NotImplementedError
+    return hashlib.sha256(plain_text_password.encode()).hexdigest()
 
 
 def check_password(attempt: str, stored_hash: str) -> bool:
@@ -60,7 +60,7 @@ def check_password(attempt: str, stored_hash: str) -> bool:
     TODO:
         return hash_password(attempt) == stored_hash
     """
-    raise NotImplementedError
+    return hash_password(attempt) == stored_hash
 
 
 def login_gate(stored_hash: str, max_attempts: int = 3) -> bool:
@@ -83,7 +83,17 @@ def login_gate(stored_hash: str, max_attempts: int = 3) -> bool:
         print("Access denied — too many failed attempts.")
         return False
     """
-    raise NotImplementedError
+    for attempt_number in range(max_attempts):
+        attempt = getpass.getpass("Enter password to view reports: ")
+
+        if check_password(attempt, stored_hash):
+            print("Access granted.")
+            return True
+        else:
+            print("Incorrect password. Try again.")
+
+    print("Access denied — too many failed attempts.")
+    return False
 
 
 # ---------------------------------------------------------------------
@@ -97,3 +107,4 @@ def login_gate(stored_hash: str, max_attempts: int = 3) -> bool:
 #      like this stored only on your own laptop, and what would you
 #      recommend to protect against it?
 # ---------------------------------------------------------------------
+STORED_PASSWORD_HASH = hash_password("StoreAccess2026!")
