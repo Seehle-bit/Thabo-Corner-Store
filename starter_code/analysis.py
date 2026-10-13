@@ -26,12 +26,12 @@ def total_sales_records(sales_rows: list) -> int:
     Returns:
         the total number of records, as an integer, counted with a loop.
     """
-    # TODO:
-    #   count = 0
-    #   for row in sales_rows:
-    #       count += 1
-    #   return count
-    raise NotImplementedError
+    count = 0
+
+    for row in sales_rows:
+        count += 1
+
+    return count
 
 
 def low_stock_alert(products_rows: list, threshold: int = 5) -> list:
@@ -48,13 +48,13 @@ def low_stock_alert(products_rows: list, threshold: int = 5) -> list:
     Returns:
         a list of product_name strings that need re-ordering.
     """
-    # TODO:
-    #   alerts = []
-    #   for product in products_rows:
-    #       if product["in_stock"] is False:   # or == "False", check your data type
-    #           alerts.append(product["product_name"])
-    #   return alerts
-    raise NotImplementedError
+    alerts = []
+
+    for product in products_rows:
+        if product["in_stock"] is False:
+            alerts.append(product["product_name"])
+
+    return alerts
 
 
 def monthly_sales_trend(sales_rows: list) -> dict:
@@ -80,7 +80,17 @@ def monthly_sales_trend(sales_rows: list) -> dict:
                 trend[month] = row["quantity"]
         return trend
     """
-    raise NotImplementedError
+    trend = {}
+
+    for row in sales_rows:
+        month = row["sale_date"][:7]
+
+        if month in trend:
+            trend[month] += row["quantity"]
+        else:
+            trend[month] = row["quantity"]
+
+    return trend
 
 
 def classify_transaction_size(quantity: int) -> str:
@@ -95,7 +105,14 @@ def classify_transaction_size(quantity: int) -> str:
 
     TODO: implement the if / elif / else chain above.
     """
-    raise NotImplementedError
+    if quantity >= 5:
+        return "Bulk"
+    elif quantity >= 2:
+        return "Multiple"
+    elif quantity == 1:
+        return "Single"
+    else:
+        return "Invalid"
 
 
 def average_basket_size(sales_rows: list) -> float:
@@ -112,4 +129,12 @@ def average_basket_size(sales_rows: list) -> float:
             total += row["quantity"]
         return round(total / len(sales_rows), 2)
     """
-    raise NotImplementedError
+    if not sales_rows:
+        return 0.0
+
+    total = 0
+
+    for row in sales_rows:
+        total += row["quantity"]
+
+    return round(total / len(sales_rows), 2)
