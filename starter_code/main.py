@@ -23,7 +23,7 @@ import analysis
 import visualize
 import security
 
-DATA_DIR = os.path.join("..", "data")   # adjust if your folder layout differs
+DATA_DIR = "data"   # adjust if your folder layout differs
 PRODUCTS_CSV = os.path.join(DATA_DIR, "products.csv")
 SALES_CSV = os.path.join(DATA_DIR, "sales.csv")
 DB_PATH = "store.db"

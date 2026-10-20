@@ -94,7 +94,7 @@ def insert_products(conn: sqlite3.Connection, products_df) -> None:
     for row in products_df.itertuples(index=False):
         conn.execute(
             """
-            INSERT INTO products
+            INSERT OR IGNORE INTO products
             (product_id, product_name, category, unit_price)
             VALUES (?, ?, ?, ?)
             """,
@@ -113,7 +113,7 @@ def insert_sales(conn: sqlite3.Connection, sales_df) -> None:
     for row in sales_df.itertuples(index=False):
         conn.execute(
             """
-            INSERT INTO sales
+            INSERT OR IGNORE INTO sales
             (sale_id, product_id, quantity, sale_date, payment_method, customer_type)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
