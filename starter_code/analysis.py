@@ -90,7 +90,7 @@ def monthly_sales_trend(sales_rows: list) -> dict:
         else:
             trend[month] = row["quantity"]
 
-    return trend
+    return dict(sorted(trend.items()))
 
 
 def classify_transaction_size(quantity: int) -> str:
