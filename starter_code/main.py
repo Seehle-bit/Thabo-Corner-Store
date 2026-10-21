@@ -35,13 +35,9 @@ def main():
     print("=" * 60)
 
     # ---- Task 6: security gate -------------------------------------
-    # TODO: once you've set security.STORED_PASSWORD_HASH to a real
-    # hash (e.g. security.hash_password("letmein")), uncomment this
-    # block so reports require a password before they are shown.
-    #
-    # if not security.login_gate(security.STORED_PASSWORD_HASH):
-    #     return
-
+    if not security.login_gate(security.STORED_PASSWORD_HASH):
+        return
+        
     # ---- Task 2: load & clean data ----------------------------------
     print("\n[1/5] Loading raw data...")
     raw_products, raw_sales = data_cleaning.load_raw_data(PRODUCTS_CSV, SALES_CSV)
