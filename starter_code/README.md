@@ -7,10 +7,34 @@ An integrated AI Software Development project combining data cleaning, SQLite da
 **Tools:** Python, pandas, SQLite, SQL and Matplotlib
 
 
-This is your starting scaffold. It already contains the **shape** of the
-project — file structure, function signatures, imports and docstrings —
-so you can focus on the actual data, database and programming logic
-described in the Project Brief.
+## Project Overview
+
+Thabo's Corner Store — Sales Insights System is a completed integrated learning project for the Occupational Certificate: Artificial Intelligence Software Developer, NQF Level 4. It combines KM-04 Data & Databases with KM-05 Programming & Python.
+
+The application processes raw product and sales CSV files, cleans data-quality issues, stores validated records in a relational SQLite database, runs SQL queries, analyses sales patterns using Python, generates charts with Matplotlib, and demonstrates a password-hashing login gate.
+
+The project was developed in stages using computational thinking, modular programming, data validation, and Git version control. It is an educational prototype designed to demonstrate core software development and data analysis skills, not a production-ready retail system.
+
+## Running the Program
+
+From the main project folder, open PowerShell and install the dependencies:
+
+```powershell
+python -m pip install -r starter_code/requirements.txt
+```
+
+Run the complete application:
+
+```powershell
+python starter_code/main.py
+```
+
+The program loads the raw CSV files, cleans the data, builds and queries the SQLite database, performs sales analysis, and generates the following chart files:
+
+- `revenue_per_product.png`
+- `monthly_trend.png`
+
+Python 3.10 or later is required. The project uses pandas, Matplotlib, and Python's built-in SQLite support.
 
 ## Folder structure
 
@@ -68,20 +92,6 @@ From the main project folder, open PowerShell and run:
 python starter_code/main.py
 ```
 
-## A note on the TODOs
-
-Every function you need to complete has:
-- A docstring explaining **what** it must do
-- A `# TODO:` comment explaining **the specific steps**
-- `raise NotImplementedError` as a placeholder — delete this once you've
-  written your own code
-
-Do not change the function names or the arguments they accept —
-`main.py` calls them by name, and your facilitator's marking checklist
-also references these exact names.
-
-Good luck — and remember to commit your progress to GitHub regularly
-as you complete each task, not just once at the end!
 
 ## Task 2 — Data Cleaning Findings
 
@@ -111,6 +121,8 @@ The following cleaning decisions were made:
 
 After cleaning, the data contained no missing sale dates, quantities or payment methods, no invalid product IDs and no duplicate rows.
 
+**Date-format handling:** Sale dates were parsed using pandas with `format="mixed"` and `errors="coerce"`. Values that could not be parsed were treated as missing and removed. Valid dates were then standardised to `YYYY-MM-DD`. Some date strings can be interpreted in more than one way, so ambiguous dates must be checked against the source format or an agreed date convention before the results are treated as definitive.
+
 ## Task 3 — Database and SQL
 
 ### Database Design
@@ -135,6 +147,14 @@ The highest-revenue products were:
 - 5kg Maize Meal — R801.00
 - Eggs (6 pack) — R364.00
 - Bar One Chocolate — R224.00
+
+**Data-quality finding: duplicate product names**
+
+The raw products data contained two records for Coca-Cola 500ml, with product IDs `P001` and `P015`. Both records had the same category and unit price, but both IDs were referenced in the sales data.
+
+Rather than deleting a product record or rewriting historical sales, the revenue query was updated to group results by `product_name`. This combines revenue from both IDs into one report entry, showing total Coca-Cola 500ml revenue of **R222.00** in the cleaned dataset.
+
+The original product IDs remain unchanged in the source data and database. This reporting decision combines products with identical names; in a real business system, duplicate records should be investigated to confirm whether they represent the same product before merging inventory or master records.
 
 #### 2. Best-selling product
 
@@ -192,7 +212,7 @@ The `low_stock_alert()` function identifies products that are marked as out of s
 
 ### 3. Monthly sales trend
 
-The `monthly_sales_trend()` function groups sales quantities by month to support trend analysis. The results showed activity across eight months in the supplied dataset. The data contains gaps between months, so these results should not be interpreted as a complete record of every month of the year.
+The `monthly_sales_trend()` function groups sales quantities by month to support trend analysis. The cleaned dataset showed sales activity in January and February 2026, with monthly totals of 52 and 44 units respectively. These results reflect the available cleaned records and should not be interpreted as a complete record of every month of the year.
 
 ### 4. Transaction-size classification
 
