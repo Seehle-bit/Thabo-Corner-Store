@@ -81,20 +81,16 @@ def create_tables(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-def insert_products(conn: sqlite3.Connection, products_df) -> None:
-    """
-    Insert every row of the cleaned products DataFrame into the
-    products table.
 
-    TODO:
-        Loop through products_df.itertuples() (or use
-        products_df.to_sql("products", conn, if_exists="append", index=False))
-        and insert each row. Remember conn.commit().
-    """
+def insert_products(conn: sqlite3.Connection, products_df) -> None:
+    """Replace stored products with the latest cleaned product data."""
+    conn.execute("DELETE FROM sales")
+    conn.execute("DELETE FROM products")
+
     for row in products_df.itertuples(index=False):
         conn.execute(
             """
-            INSERT OR IGNORE INTO products
+            INSERT INTO products
             (product_id, product_name, category, unit_price)
             VALUES (?, ?, ?, ?)
             """,
@@ -104,16 +100,16 @@ def insert_products(conn: sqlite3.Connection, products_df) -> None:
     conn.commit()
 
 
-def insert_sales(conn: sqlite3.Connection, sales_df) -> None:
-    """
-    Insert every row of the cleaned sales DataFrame into the sales table.
 
-    TODO: same approach as insert_products().
-    """
+
+def insert_sales(conn: sqlite3.Connection, sales_df) -> None:
+    """Replace stored sales with the latest cleaned sales data."""
+    conn.execute("DELETE FROM sales")
+
     for row in sales_df.itertuples(index=False):
         conn.execute(
             """
-            INSERT OR IGNORE INTO sales
+            INSERT INTO sales
             (sale_id, product_id, quantity, sale_date, payment_method, customer_type)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
@@ -128,6 +124,7 @@ def insert_sales(conn: sqlite3.Connection, sales_df) -> None:
         )
 
     conn.commit()
+
 
 
 # ---------------------------------------------------------------------

@@ -74,49 +74,52 @@ def clean_products(products_df: "pd.DataFrame") -> "pd.DataFrame":
     return cleaned
 
 
+
 def clean_sales(sales_df: "pd.DataFrame", valid_product_ids) -> "pd.DataFrame":
     """
-    Clean the sales DataFrame.
-
-    Args:
-        sales_df: the raw sales DataFrame
-        valid_product_ids: a collection of product_id values that exist
-            in the cleaned products table (use this to catch invalid /
-            mistyped product references)
-
-    Must handle:
-        - Standardise sale_date to a single format: YYYY-MM-DD
-          (hint: pandas.to_datetime() can parse several formats if you
-          pass them one at a time, or try errors="coerce" and inspect
-          what fails)
-        - Rows with a missing or unparseable sale_date
-        - Rows with a missing quantity
-        - Rows with a missing payment_method (what's a sensible default?
-          "Unknown" is a common, honest choice — don't guess a specific method)
-        - Rows whose product_id is NOT in valid_product_ids
-        - Duplicate rows
-
-    Returns:
-        A cleaned copy of the DataFrame with a standardised sale_date
-        column (as a string in YYYY-MM-DD format) and no missing values
-        in quantity or product_id.
+    Clean sales data and standardise dates to YYYY-MM-DD.
     """
     cleaned = sales_df.copy()
-    cleaned["sale_date"] = pd.to_datetime(
-    cleaned["sale_date"],
-    format="mixed",
-    errors="coerce"
-)
+
+    # Standardise the supported date formats explicitly.
+    raw_dates = cleaned["sale_date"].astype("string").str.strip()
+
+    parsed_dates = pd.Series(
+        pd.NaT,
+        index=cleaned.index,
+        dtype="datetime64[ns]"
+    )
+
+    date_formats = [
+        "%Y-%m-%d",
+        "%Y/%m/%d",
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+    ]
+
+    for date_format in date_formats:
+        converted = pd.to_datetime(
+            raw_dates,
+            format=date_format,
+            errors="coerce"
+        )
+        parsed_dates = parsed_dates.fillna(converted)
+
+    cleaned["sale_date"] = parsed_dates
     cleaned = cleaned.dropna(subset=["sale_date"])
     cleaned["sale_date"] = cleaned["sale_date"].dt.strftime("%Y-%m-%d")
-    cleaned["quantity"] = pd.to_numeric(cleaned["quantity"], errors="coerce")
+    
+
+    # Clean the remaining sales columns.
+    cleaned["quantity"] = pd.to_numeric(
+        cleaned["quantity"], errors="coerce"
+    )
     cleaned = cleaned.dropna(subset=["quantity"])
     cleaned["payment_method"] = cleaned["payment_method"].fillna("Unknown")
     cleaned = cleaned[cleaned["product_id"].isin(valid_product_ids)]
     cleaned = cleaned.drop_duplicates()
 
     return cleaned
-
 
 def cleaning_summary(raw_df: "pd.DataFrame", clean_df: "pd.DataFrame", name: str) -> str:
     """
