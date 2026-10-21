@@ -147,7 +147,7 @@ def query_total_revenue_per_product(conn: sqlite3.Connection):
         FROM sales
         JOIN products
             ON sales.product_id = products.product_id
-        GROUP BY products.product_id, products.product_name
+        GROUP BY products.product_name
         ORDER BY total_revenue DESC
     """
     return conn.execute(sql).fetchall()
